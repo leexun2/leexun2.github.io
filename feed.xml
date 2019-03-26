@@ -5,8 +5,8 @@
     <description>Lee Xun's blog</description>
     <link>https://blog.leexun.tw/</link>
     <atom:link href="https://blog.leexun.tw/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 27 Mar 2019 00:54:25 +0800</pubDate>
-    <lastBuildDate>Wed, 27 Mar 2019 00:54:25 +0800</lastBuildDate>
+    <pubDate>Wed, 27 Mar 2019 01:40:20 +0800</pubDate>
+    <lastBuildDate>Wed, 27 Mar 2019 01:40:20 +0800</lastBuildDate>
     <generator>Jekyll v3.6.3</generator>
     
       <item>
@@ -35,7 +35,7 @@
 &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__libc_malloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;size_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PREALIAS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;je_malloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;cp&quot;&gt;#    endif&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Tracking into &lt;a href=&quot;https://github.com/jemalloc/jemalloc/blob/fb56766ca9b398d07e2def5ead75a021fc08da03/src/jemalloc.c#L2242-L2311&quot;&gt;je_malloc&lt;/a&gt;. Current je_malloc in this dev branch is not the same as released. They add some code to improve performance which is based these concepts:&lt;/p&gt;
+&lt;p&gt;Tracking into &lt;a href=&quot;https://github.com/jemalloc/jemalloc/blob/fb56766ca9b398d07e2def5ead75a021fc08da03/src/jemalloc.c#L2242-L2311&quot;&gt;je_malloc&lt;/a&gt;. Current je_malloc in this dev branch is not the same as released. They add some code to improve performance which is based on these concepts:&lt;/p&gt;
 &lt;ul&gt;
   &lt;li&gt;caching by tcache (thread cache)&lt;/li&gt;
   &lt;li&gt;tail-calling the old je_malloc&lt;/li&gt;

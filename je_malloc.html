@@ -93,7 +93,7 @@
 <span class="kt">void</span> <span class="o">*</span><span class="n">__libc_malloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="n">PREALIAS</span><span class="p">(</span><span class="n">je_malloc</span><span class="p">);</span>
 <span class="cp">#    endif</span></code></pre></figure>
 
-<p>Tracking into <a href="https://github.com/jemalloc/jemalloc/blob/fb56766ca9b398d07e2def5ead75a021fc08da03/src/jemalloc.c#L2242-L2311">je_malloc</a>. Current je_malloc in this dev branch is not the same as released. They add some code to improve performance which is based these concepts:</p>
+<p>Tracking into <a href="https://github.com/jemalloc/jemalloc/blob/fb56766ca9b398d07e2def5ead75a021fc08da03/src/jemalloc.c#L2242-L2311">je_malloc</a>. Current je_malloc in this dev branch is not the same as released. They add some code to improve performance which is based on these concepts:</p>
 <ul>
   <li>caching by tcache (thread cache)</li>
   <li>tail-calling the old je_malloc</li>
