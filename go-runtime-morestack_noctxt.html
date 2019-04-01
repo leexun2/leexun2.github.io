@@ -72,16 +72,16 @@
     <h3 id="whats-the-default-stack-size-of-a-goroutine">What’s the default stack size of a goroutine?</h3>
 <p>For the default stack size of a goroutine. Basically it’s <a href="https://github.com/golang/go/blob/release-branch.go1.12/src/runtime/stack.go#L70-L71">2Kb pre routine</a>. But soon we can discover in the source code, there is more stack space needed for <a href="https://github.com/golang/go/blob/release-branch.go1.12/src/runtime/stack.go#L68">OS-specific purposes like signal handling.</a> And <a href="https://github.com/golang/go/blob/release-branch.go1.12/src/runtime/stack.go#L73-L82">the code</a> will round the sum of them to a power of 2:</p>
 
-<figure class="highlight"><pre><code class="language-go" data-lang="go"><span></span>	<span class="c1">// The minimum stack size to allocate.</span>
-	<span class="c1">// The hackery here rounds FixedStack0 up to a power of 2.</span>
-	<span class="nx">_FixedStack0</span> <span class="p">=</span> <span class="nx">_StackMin</span> <span class="o">+</span> <span class="nx">_StackSystem</span>
-	<span class="nx">_FixedStack1</span> <span class="p">=</span> <span class="nx">_FixedStack0</span> <span class="o">-</span> <span class="mi">1</span>
-	<span class="nx">_FixedStack2</span> <span class="p">=</span> <span class="nx">_FixedStack1</span> <span class="p">|</span> <span class="p">(</span><span class="nx">_FixedStack1</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span>
-	<span class="nx">_FixedStack3</span> <span class="p">=</span> <span class="nx">_FixedStack2</span> <span class="p">|</span> <span class="p">(</span><span class="nx">_FixedStack2</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">)</span>
-	<span class="nx">_FixedStack4</span> <span class="p">=</span> <span class="nx">_FixedStack3</span> <span class="p">|</span> <span class="p">(</span><span class="nx">_FixedStack3</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span>
-	<span class="nx">_FixedStack5</span> <span class="p">=</span> <span class="nx">_FixedStack4</span> <span class="p">|</span> <span class="p">(</span><span class="nx">_FixedStack4</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span>
-	<span class="nx">_FixedStack6</span> <span class="p">=</span> <span class="nx">_FixedStack5</span> <span class="p">|</span> <span class="p">(</span><span class="nx">_FixedStack5</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span>
-	<span class="nx">_FixedStack</span>  <span class="p">=</span> <span class="nx">_FixedStack6</span> <span class="o">+</span> <span class="mi">1</span></code></pre></figure>
+<figure class="highlight"><pre><code class="language-go" data-lang="go"><span></span><span class="c1">// The minimum stack size to allocate.</span>
+<span class="c1">// The hackery here rounds FixedStack0 up to a power of 2.</span>
+<span class="nx">_FixedStack0</span> <span class="p">=</span> <span class="nx">_StackMin</span> <span class="o">+</span> <span class="nx">_StackSystem</span>
+<span class="nx">_FixedStack1</span> <span class="p">=</span> <span class="nx">_FixedStack0</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="nx">_FixedStack2</span> <span class="p">=</span> <span class="nx">_FixedStack1</span> <span class="p">|</span> <span class="p">(</span><span class="nx">_FixedStack1</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span>
+<span class="nx">_FixedStack3</span> <span class="p">=</span> <span class="nx">_FixedStack2</span> <span class="p">|</span> <span class="p">(</span><span class="nx">_FixedStack2</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span><span class="p">)</span>
+<span class="nx">_FixedStack4</span> <span class="p">=</span> <span class="nx">_FixedStack3</span> <span class="p">|</span> <span class="p">(</span><span class="nx">_FixedStack3</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span>
+<span class="nx">_FixedStack5</span> <span class="p">=</span> <span class="nx">_FixedStack4</span> <span class="p">|</span> <span class="p">(</span><span class="nx">_FixedStack4</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span><span class="p">)</span>
+<span class="nx">_FixedStack6</span> <span class="p">=</span> <span class="nx">_FixedStack5</span> <span class="p">|</span> <span class="p">(</span><span class="nx">_FixedStack5</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span>
+<span class="nx">_FixedStack</span>  <span class="p">=</span> <span class="nx">_FixedStack6</span> <span class="o">+</span> <span class="mi">1</span></code></pre></figure>
 
 <p>The _FixedStack will finally assign to variable <code>s</code>, the stack in <a href="https://github.com/golang/go/blob/release-branch.go1.12/src/runtime/stack.go#L174"><code>func stackpoolalloc</code></a>.</p>
 
