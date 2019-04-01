@@ -5,12 +5,12 @@
     <description>Lee Xun's blog</description>
     <link>https://blog.leexun.tw/</link>
     <atom:link href="https://blog.leexun.tw/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 02 Apr 2019 01:27:15 +0800</pubDate>
-    <lastBuildDate>Tue, 02 Apr 2019 01:27:15 +0800</lastBuildDate>
+    <pubDate>Tue, 02 Apr 2019 01:33:27 +0800</pubDate>
+    <lastBuildDate>Tue, 02 Apr 2019 01:33:27 +0800</lastBuildDate>
     <generator>Jekyll v3.6.3</generator>
     
       <item>
-        <title>Go $runtime.morestack_noctxt</title>
+        <title>Go morestack_noctxt</title>
         <description>&lt;h3 id=&quot;whats-the-default-stack-size-of-a-goroutine&quot;&gt;What’s the default stack size of a goroutine?&lt;/h3&gt;
 &lt;p&gt;For the default stack size of a goroutine. Basically it’s &lt;a href=&quot;https://github.com/golang/go/blob/release-branch.go1.12/src/runtime/stack.go#L70-L71&quot;&gt;2Kb pre routine&lt;/a&gt;. But soon we can discover in the source code, there is more stack space needed for &lt;a href=&quot;https://github.com/golang/go/blob/release-branch.go1.12/src/runtime/stack.go#L68&quot;&gt;OS-specific purposes like signal handling.&lt;/a&gt; And &lt;a href=&quot;https://github.com/golang/go/blob/release-branch.go1.12/src/runtime/stack.go#L73-L82&quot;&gt;the code&lt;/a&gt; will round the sum of them to a power of 2:&lt;/p&gt;
 
