@@ -5,9 +5,88 @@
     <description>Lee Xun's blog</description>
     <link>https://blog.leexun.tw/</link>
     <atom:link href="https://blog.leexun.tw/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 29 Mar 2019 11:16:08 +0800</pubDate>
-    <lastBuildDate>Fri, 29 Mar 2019 11:16:08 +0800</lastBuildDate>
+    <pubDate>Tue, 02 Apr 2019 01:27:15 +0800</pubDate>
+    <lastBuildDate>Tue, 02 Apr 2019 01:27:15 +0800</lastBuildDate>
     <generator>Jekyll v3.6.3</generator>
+    
+      <item>
+        <title>Go $runtime.morestack_noctxt</title>
+        <description>&lt;h3 id=&quot;whats-the-default-stack-size-of-a-goroutine&quot;&gt;What’s the default stack size of a goroutine?&lt;/h3&gt;
+&lt;p&gt;For the default stack size of a goroutine. Basically it’s &lt;a href=&quot;https://github.com/golang/go/blob/release-branch.go1.12/src/runtime/stack.go#L70-L71&quot;&gt;2Kb pre routine&lt;/a&gt;. But soon we can discover in the source code, there is more stack space needed for &lt;a href=&quot;https://github.com/golang/go/blob/release-branch.go1.12/src/runtime/stack.go#L68&quot;&gt;OS-specific purposes like signal handling.&lt;/a&gt; And &lt;a href=&quot;https://github.com/golang/go/blob/release-branch.go1.12/src/runtime/stack.go#L73-L82&quot;&gt;the code&lt;/a&gt; will round the sum of them to a power of 2:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span&gt;&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;// The minimum stack size to allocate.&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;// The hackery here rounds FixedStack0 up to a power of 2.&lt;/span&gt;
+	&lt;span class=&quot;nx&quot;&gt;_FixedStack0&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_StackMin&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_StackSystem&lt;/span&gt;
+	&lt;span class=&quot;nx&quot;&gt;_FixedStack1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_FixedStack0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+	&lt;span class=&quot;nx&quot;&gt;_FixedStack2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_FixedStack1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;_FixedStack1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;nx&quot;&gt;_FixedStack3&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_FixedStack2&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;_FixedStack2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;nx&quot;&gt;_FixedStack4&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_FixedStack3&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;_FixedStack3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;nx&quot;&gt;_FixedStack5&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_FixedStack4&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;_FixedStack4&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;nx&quot;&gt;_FixedStack6&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_FixedStack5&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;|&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;_FixedStack5&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;nx&quot;&gt;_FixedStack&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;_FixedStack6&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The _FixedStack will finally assign to variable &lt;code&gt;s&lt;/code&gt;, the stack in &lt;a href=&quot;https://github.com/golang/go/blob/release-branch.go1.12/src/runtime/stack.go#L174&quot;&gt;&lt;code&gt;func stackpoolalloc&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;where-is-to-increase-the-stack-size&quot;&gt;Where is to increase the stack size?&lt;/h3&gt;
+&lt;p&gt;I know the answer is pretty clear, but let’s find them in the assembly.&lt;br /&gt;
+Give this example code:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;// example.go&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;package&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;main&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;nx&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;We use &lt;code&gt;dlv debug example.go&lt;/code&gt; and type &lt;code&gt;disass -l main.main&lt;/code&gt;. And we can see following output:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span&gt;&lt;/span&gt;example.go:5	0x1054c00	65488b0c2530000000	mov rcx, qword ptr gs:&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;0x30&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+example.go:5	0x1054c09	483b6110		cmp rsp, qword ptr &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rcx+0x10&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+example.go:5	0x1054c0d	761a			jbe 0x1054c29
+example.go:5	0x1054c0f	4883ec08		sub rsp, 0x8
+example.go:5	0x1054c13	48892c24		mov qword ptr &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rsp&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;, rbp
+example.go:5	0x1054c17	488d2c24		lea rbp, ptr &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rsp&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+example.go:6	0x1054c1b	e8d0ffffff		call &lt;span class=&quot;nv&quot;&gt;$main&lt;/span&gt;.f
+example.go:7	0x1054c20	488b2c24		mov rbp, qword ptr &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rsp&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+example.go:7	0x1054c24	4883c408		add rsp, 0x8
+example.go:7	0x1054c28	c3			ret
+example.go:5	0x1054c29	e86284ffff		call &lt;span class=&quot;nv&quot;&gt;$runtime&lt;/span&gt;.morestack_noctxt
+example.go:5	0x1054c2e	ebd0			jmp &lt;span class=&quot;nv&quot;&gt;$main&lt;/span&gt;.main&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;In &lt;code&gt;jbe 0x1054c29&lt;/code&gt;, jbe is “jump if below or equal (unsigned)” and if the jump is taken, the instruction in 0x1054c29 would be called, which is &lt;code&gt;call $runtime.morestack_noctxt&lt;/code&gt;. The cmp would set &lt;code&gt;CF&lt;/code&gt; flag for jbe if rsp is below or equal to &lt;code&gt;ptr [rcx+0x10]&lt;/code&gt;. Which means “the stack is not enough”.&lt;/p&gt;
+&lt;h4 id=&quot;ref&quot;&gt;Ref:&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://cs.brown.edu/courses/cs033/docs/guides/x64_cheatsheet.pdf&quot;&gt;x86 CheatSheet&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;why-put-runtimemorestack_noctxt-at-the-end-of-the-function&quot;&gt;Why put $runtime.morestack_noctxt at the end of the function?&lt;/h3&gt;
+&lt;p&gt;The main reason is for static branch prediction. Which implies that this conditional jump will not be taken that frequently. The critial instructions can be tightened and executed fluently by CPU which impoves performance.&lt;/p&gt;
+&lt;h4 id=&quot;ref-1&quot;&gt;Ref:&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://groups.google.com/forum/#!msg/golang-nuts/DbmqfDlAR0U/elFowQ_z_UsJ&quot;&gt;https://groups.google.com/forum/#!msg/golang-nuts/DbmqfDlAR0U/elFowQ_z_UsJ&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/golang/go/issues/10587&quot;&gt;https://github.com/golang/go/issues/10587&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;environment&quot;&gt;Environment&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-sh&quot; data-lang=&quot;sh&quot;&gt;&lt;span&gt;&lt;/span&gt;go version go1.12 darwin/amd64
+Delve Debugger
+Version: &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;.2.0
+Build: &lt;span class=&quot;nv&quot;&gt;$Id&lt;/span&gt;: 068e2451004e95d0b042e5257e34f0f08ce01466 $&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+        <pubDate>Mon, 01 Apr 2019 22:26:19 +0800</pubDate>
+        <link>https://blog.leexun.tw/go-runtime-morestack_noctxt</link>
+        <guid isPermaLink="true">https://blog.leexun.tw/go-runtime-morestack_noctxt</guid>
+        
+        <category>go</category>
+        
+        
+        <category>go</category>
+        
+      </item>
     
       <item>
         <title>je_malloc</title>
