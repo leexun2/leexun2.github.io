@@ -5,8 +5,8 @@
     <description>Lee Xun's blog</description>
     <link>https://blog.leexun.tw/</link>
     <atom:link href="https://blog.leexun.tw/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 02 Apr 2019 01:40:08 +0800</pubDate>
-    <lastBuildDate>Tue, 02 Apr 2019 01:40:08 +0800</lastBuildDate>
+    <pubDate>Tue, 02 Apr 2019 01:53:44 +0800</pubDate>
+    <lastBuildDate>Tue, 02 Apr 2019 01:53:44 +0800</lastBuildDate>
     <generator>Jekyll v3.6.3</generator>
     
       <item>
@@ -65,8 +65,8 @@ example.go:5	0x1054c2e	ebd0			jmp &lt;span class=&quot;nv&quot;&gt;$main&lt;/spa
 &lt;p&gt;The main reason is for static branch prediction. Which implies that this conditional jump will not be taken that frequently. The critial instructions can be tightened and executed fluently by CPU which impoves performance.&lt;/p&gt;
 &lt;h4 id=&quot;ref-1&quot;&gt;Ref:&lt;/h4&gt;
 &lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://groups.google.com/forum/#!msg/golang-nuts/DbmqfDlAR0U/elFowQ_z_UsJ&quot;&gt;https://groups.google.com/forum/#!msg/golang-nuts/DbmqfDlAR0U/elFowQ_z_UsJ&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/golang/go/issues/10587&quot;&gt;https://github.com/golang/go/issues/10587&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://groups.google.com/forum/#!msg/golang-nuts/DbmqfDlAR0U/elFowQ_z_UsJ&quot;&gt;Forum&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/golang/go/issues/10587&quot;&gt;Issue&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h3 id=&quot;environment&quot;&gt;Environment&lt;/h3&gt;

@@ -123,8 +123,8 @@ example.go:5	0x1054c2e	ebd0			jmp <span class="nv">$main</span>.main</code></pre
 <p>The main reason is for static branch prediction. Which implies that this conditional jump will not be taken that frequently. The critial instructions can be tightened and executed fluently by CPU which impoves performance.</p>
 <h4 id="ref-1">Ref:</h4>
 <ul>
-  <li><a href="https://groups.google.com/forum/#!msg/golang-nuts/DbmqfDlAR0U/elFowQ_z_UsJ">https://groups.google.com/forum/#!msg/golang-nuts/DbmqfDlAR0U/elFowQ_z_UsJ</a></li>
-  <li><a href="https://github.com/golang/go/issues/10587">https://github.com/golang/go/issues/10587</a></li>
+  <li><a href="https://groups.google.com/forum/#!msg/golang-nuts/DbmqfDlAR0U/elFowQ_z_UsJ">Forum</a></li>
+  <li><a href="https://github.com/golang/go/issues/10587">Issue</a></li>
 </ul>
 
 <h3 id="environment">Environment</h3>
