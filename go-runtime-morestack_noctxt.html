@@ -113,7 +113,7 @@ example.go:7	0x1054c28	c3			ret
 example.go:5	0x1054c29	e86284ffff		call <span class="nv">$runtime</span>.morestack_noctxt
 example.go:5	0x1054c2e	ebd0			jmp <span class="nv">$main</span>.main</code></pre></figure>
 
-<p>In <code>jbe 0x1054c29</code>, jbe is “jump if below or equal (unsigned)” and if the jump is taken, the instruction in 0x1054c29 would be called, which is <code>call $runtime.morestack_noctxt</code>. The cmp would set <code>CF</code> flag for jbe if rsp is below or equal to <code>ptr [rcx+0x10]</code>. Which means “the stack is not enough”.</p>
+<p>In <code>jbe 0x1054c29</code>, jbe is “jump if below or equal (unsigned)” and if the jump is taken, the instruction in 0x1054c29 would be called, which is <code>call $runtime.morestack_noctxt</code>. The cmp would set <code>CF</code> flag for jbe when <code>ptr [rcx+0x10]</code> is below or equal to rsp. Which means “the stack is not enough”.</p>
 <h4 id="ref">Ref:</h4>
 <ul>
   <li><a href="https://cs.brown.edu/courses/cs033/docs/guides/x64_cheatsheet.pdf">x86 CheatSheet</a></li>

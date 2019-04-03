@@ -5,8 +5,8 @@
     <description>Lee Xun's blog</description>
     <link>https://blog.leexun.tw/</link>
     <atom:link href="https://blog.leexun.tw/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 02 Apr 2019 01:53:44 +0800</pubDate>
-    <lastBuildDate>Tue, 02 Apr 2019 01:53:44 +0800</lastBuildDate>
+    <pubDate>Thu, 04 Apr 2019 00:40:59 +0800</pubDate>
+    <lastBuildDate>Thu, 04 Apr 2019 00:40:59 +0800</lastBuildDate>
     <generator>Jekyll v3.6.3</generator>
     
       <item>
@@ -55,7 +55,7 @@ example.go:7	0x1054c28	c3			ret
 example.go:5	0x1054c29	e86284ffff		call &lt;span class=&quot;nv&quot;&gt;$runtime&lt;/span&gt;.morestack_noctxt
 example.go:5	0x1054c2e	ebd0			jmp &lt;span class=&quot;nv&quot;&gt;$main&lt;/span&gt;.main&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;In &lt;code&gt;jbe 0x1054c29&lt;/code&gt;, jbe is “jump if below or equal (unsigned)” and if the jump is taken, the instruction in 0x1054c29 would be called, which is &lt;code&gt;call $runtime.morestack_noctxt&lt;/code&gt;. The cmp would set &lt;code&gt;CF&lt;/code&gt; flag for jbe if rsp is below or equal to &lt;code&gt;ptr [rcx+0x10]&lt;/code&gt;. Which means “the stack is not enough”.&lt;/p&gt;
+&lt;p&gt;In &lt;code&gt;jbe 0x1054c29&lt;/code&gt;, jbe is “jump if below or equal (unsigned)” and if the jump is taken, the instruction in 0x1054c29 would be called, which is &lt;code&gt;call $runtime.morestack_noctxt&lt;/code&gt;. The cmp would set &lt;code&gt;CF&lt;/code&gt; flag for jbe when &lt;code&gt;ptr [rcx+0x10]&lt;/code&gt; is below or equal to rsp. Which means “the stack is not enough”.&lt;/p&gt;
 &lt;h4 id=&quot;ref&quot;&gt;Ref:&lt;/h4&gt;
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;https://cs.brown.edu/courses/cs033/docs/guides/x64_cheatsheet.pdf&quot;&gt;x86 CheatSheet&lt;/a&gt;&lt;/li&gt;
