@@ -5,36 +5,9 @@
     <description>Lee Xun's blog</description>
     <link>https://blog.leexun.tw/</link>
     <atom:link href="https://blog.leexun.tw/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 19 Apr 2019 12:17:46 +0800</pubDate>
-    <lastBuildDate>Fri, 19 Apr 2019 12:17:46 +0800</lastBuildDate>
+    <pubDate>Thu, 04 Apr 2019 00:40:59 +0800</pubDate>
+    <lastBuildDate>Thu, 04 Apr 2019 00:40:59 +0800</lastBuildDate>
     <generator>Jekyll v3.6.3</generator>
-    
-      <item>
-        <title>Golang about go_tls.h and go_asm.h</title>
-        <description>&lt;p&gt;According to &lt;a href=&quot;https://golang.org/doc/asm#x86&quot;&gt;official documentation&lt;/a&gt;, get_tls is a marco defined in go_asm.h. But it is actually in go_tls.h which is in the go source.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-asm&quot; data-lang=&quot;asm&quot;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&quot;c&quot;&gt;#include &amp;quot;go_asm.h&amp;quot; // this should be #include &amp;quot;go_tls.h&amp;quot;&lt;/span&gt;
-&lt;span class=&quot;nf&quot;&gt;get_tls&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nf&quot;&gt;MOVL&lt;/span&gt;	&lt;span class=&quot;no&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;CX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;AX&lt;/span&gt;     &lt;span class=&quot;err&quot;&gt;//&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Move&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;g&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;into&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;AX.&lt;/span&gt;
-&lt;span class=&quot;nf&quot;&gt;MOVL&lt;/span&gt;	&lt;span class=&quot;no&quot;&gt;g_m&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;AX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;BX&lt;/span&gt;   &lt;span class=&quot;err&quot;&gt;//&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Move&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;g.m&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;into&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;BX.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;I made these two PRs[1][2] in golang, but I recieve a feedback which think this is not helpful. It’s really depressing.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;[1] &lt;a href=&quot;https://go-review.googlesource.com/c/go/+/172699&quot;&gt;https://go-review.googlesource.com/c/go/+/172699&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;[2] &lt;a href=&quot;https://go-review.googlesource.com/c/go/+/172577&quot;&gt;https://go-review.googlesource.com/c/go/+/172577&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-        <pubDate>Thu, 18 Apr 2019 22:26:19 +0800</pubDate>
-        <link>https://blog.leexun.tw/golang-tls-asm-header</link>
-        <guid isPermaLink="true">https://blog.leexun.tw/golang-tls-asm-header</guid>
-        
-        <category>go</category>
-        
-        
-        <category>go</category>
-        
-      </item>
     
       <item>
         <title>Go morestack_noctxt</title>

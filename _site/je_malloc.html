@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>je_malloc</title>
+<meta name="description" content="I was planning to write some notes about ptmalloc, tcmalloc and jemalloc. Well, it is impossible for sure. So I decide to read jemalloc first, because this i...">
+<meta property="og:image" content="https://i.imgur.com/hD6x1s9.jpg">
+<meta property="og:site_name" content="Lee Xun's blog">
+<meta property="og:type" content="website">
+<meta property="og:title" content="je_malloc">
+<!-- <meta property="og:url" content="https://blog.leexun.tw/je_malloc"> -->
+<meta property="og:description" content="I was planning to write some notes about ptmalloc, tcmalloc and jemalloc. Well, it is impossible for sure. So I decide to read jemalloc first, because this i...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:creator" content="@leexun">
+<meta name="twitter:site" content="Lee Xun's blog">
+<meta name="twitter:title" content="je_malloc">
+<meta name="twitter:image" content="https://i.imgur.com/hD6x1s9.jpg">
+<link rel="stylesheet" href="/css/main.css">
+<meta name="twitter:description" content="I was planning to write some notes about ptmalloc, tcmalloc and jemalloc. Well, it is impossible for sure. So I decide to read jemalloc first, because this i...">
+<link rel="canonical" href="https://blog.leexun.tw/je_malloc">
+<link rel="alternate" type="application/rss+xml" title="Lee Xun's blog" href="https://blog.leexun.tw/feed.xml" />
+<link rel="shortcut icon" href="/favicon.ico?v=2">
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-85060382-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+</head>
+<body>
+  <header class="site-header">
+  <div class="container">
+    <!-- <input type="checkbox" id="toggleNavbar"> -->
+    <h1 class="logo"><a href="/">Lee<span>Xun</span> <small>e88081e5a986e58fafe6849b0a ♥</small></a></h1>
+    <!-- <label for="toggleNavbar" role="button" class="toggle-navbar-button">
+      <i class="icon icon-menu"></i>
+      <i class="icon icon-cross"></i>
+    </label> -->
+    <nav class="navbar">
+      <ul>
+        
+          <li><a href="/about" title="About">About</a></li>
+        
+        <li><a href="/" title="Home">Home</a></li>
+        <li><a href="/feed.xml" target="_blank"><i class="icon icon-rss"></i></a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+
+<main class="main-container">
+  <div class="container">
+    <article role="article" class="page card">
+
+  <header class="post-header">
+    <h1 class="post-title">je_malloc</h1>
+    <em class="post-meta">
+      <time>Mar 26, 2019</time>
+    </em>
+  </header>
+
+  <div class="post-content">
+    <p>I was planning to write some notes about ptmalloc, tcmalloc and jemalloc. Well, it is impossible for sure. So I decide to read jemalloc first, because this is the first malloc library that I learned while reading redis source code.</p>
+
+<h3 id="abbreviations">Abbreviations：</h3>
+<ul>
+  <li>TSD, tsd: thread specific data</li>
+  <li>TLS, tls: thread local storage</li>
+</ul>
+
+<p>Jemalloc is a general purpose malloc(3) implementation that emphasizes fragmentation avoidance and scalable concurrency support. For further information please check the links down below. I will focus on je_malloc, the main function overriding libc malloc.</p>
+<ul>
+  <li><a href="http://jemalloc.net/">official website</a>.</li>
+  <li><a href="https://github.com/jemalloc/jemalloc/wiki">github</a></li>
+  <li><a href="http://jemalloc.net/jemalloc.3.html">jemalloc(3) manual page</a></li>
+</ul>
+
+<p>The version I am reading is in HEAD commit fb56766ca9b398d07e2def5ead75a021fc08da03 due to a new implementation for performance improvement in je_malloc.</p>
+
+<p>To enable static linking with glibc, there must be a jemalloc specific malloc function implementation. The entry point is in <a href="https://github.com/jemalloc/jemalloc/blob/fb56766ca9b398d07e2def5ead75a021fc08da03/src/jemalloc.c#L2896-L2913">jemalloc.c</a>.</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span></span><span class="p">...</span>
+<span class="cp">#    ifdef JEMALLOC_OVERRIDE___LIBC_MALLOC</span>
+<span class="kt">void</span> <span class="o">*</span><span class="n">__libc_malloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="n">PREALIAS</span><span class="p">(</span><span class="n">je_malloc</span><span class="p">);</span>
+<span class="cp">#    endif</span></code></pre></figure>
+
+<p>Tracking into <a href="https://github.com/jemalloc/jemalloc/blob/fb56766ca9b398d07e2def5ead75a021fc08da03/src/jemalloc.c#L2242-L2311">je_malloc</a>. Current je_malloc in this dev branch is not the same as released. They add some code to improve performance which is based on these concepts:</p>
+<ul>
+  <li>caching by tcache (thread cache)</li>
+  <li>tail-calling the old je_malloc</li>
+</ul>
+
+<h3 id="misc">Misc</h3>
+<h4 id="tsd_get_allocates">tsd_get_allocates</h4>
+<p>This function return bool value based on platform information. So do tsd_boot0 tsd_boot1, tsd_boot, tsd_booted_get, tsd_get_allocates, tsd_get, and tsd_set.</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span></span><span class="cp">#ifdef JEMALLOC_MALLOC_THREAD_CLEANUP</span>
+<span class="cp">#include</span> <span class="cpf">&quot;jemalloc/internal/tsd_malloc_thread_cleanup.h&quot;</span><span class="cp"></span>
+<span class="cp">#elif (defined(JEMALLOC_TLS))</span>
+<span class="cp">#include</span> <span class="cpf">&quot;jemalloc/internal/tsd_tls.h&quot;</span><span class="cp"></span>
+<span class="cp">#elif (defined(_WIN32))</span>
+<span class="cp">#include</span> <span class="cpf">&quot;jemalloc/internal/tsd_win.h&quot;</span><span class="cp"></span>
+<span class="cp">#else</span>
+<span class="cp">#include</span> <span class="cpf">&quot;jemalloc/internal/tsd_generic.h&quot;</span><span class="cp"></span>
+<span class="cp">#endif</span></code></pre></figure>
+
+<h4 id="unlikely-likely">unlikely, likely</h4>
+<p>These functions are used for static branch prediction. Compiler would try to place instructions followed by a branch or not according to whether the branch is likely or unlikely to be taken.</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span></span><span class="n">JEMALLOC_EXPORT</span> <span class="n">JEMALLOC_ALLOCATOR</span> <span class="n">JEMALLOC_RESTRICT_RETURN</span>
+<span class="kt">void</span> <span class="n">JEMALLOC_NOTHROW</span> <span class="o">*</span>
+<span class="nf">JEMALLOC_ATTR</span><span class="p">(</span><span class="n">malloc</span><span class="p">)</span> <span class="n">JEMALLOC_ALLOC_SIZE</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">je_malloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">LOG</span><span class="p">(</span><span class="s">&quot;core.malloc.entry&quot;</span><span class="p">,</span> <span class="s">&quot;size: %zu&quot;</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">tsd_get_allocates</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">unlikely</span><span class="p">(</span><span class="o">!</span><span class="n">malloc_initialized</span><span class="p">()))</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">malloc_default</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="n">tsd_t</span> <span class="o">*</span><span class="n">tsd</span> <span class="o">=</span> <span class="n">tsd_get</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="o">!</span><span class="n">tsd</span> <span class="o">||</span> <span class="o">!</span><span class="n">tsd_fast</span><span class="p">(</span><span class="n">tsd</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">size</span> <span class="o">&gt;</span> <span class="n">SC_LOOKUP_MAXCLASS</span><span class="p">)))</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">malloc_default</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="n">tcache_t</span> <span class="o">*</span><span class="n">tcache</span> <span class="o">=</span> <span class="n">tsd_tcachep_get</span><span class="p">(</span><span class="n">tsd</span><span class="p">);</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="n">ticker_trytick</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tcache</span><span class="o">-&gt;</span><span class="n">gc_ticker</span><span class="p">)))</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">malloc_default</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="n">szind_t</span> <span class="n">ind</span> <span class="o">=</span> <span class="n">sz_size2index_lookup</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+	<span class="kt">size_t</span> <span class="n">usize</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">config_stats</span> <span class="o">||</span> <span class="n">config_prof</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">usize</span> <span class="o">=</span> <span class="n">sz_index2size</span><span class="p">(</span><span class="n">ind</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="cm">/* Fast path relies on size being a bin. I.e. SC_LOOKUP_MAXCLASS &lt; SC_SMALL_MAXCLASS */</span>
+	<span class="n">assert</span><span class="p">(</span><span class="n">ind</span> <span class="o">&lt;</span> <span class="n">SC_NBINS</span><span class="p">);</span>
+	<span class="n">assert</span><span class="p">(</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="n">SC_SMALL_MAXCLASS</span><span class="p">);</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">config_prof</span><span class="p">)</span> <span class="p">{</span>
+		<span class="kt">int64_t</span> <span class="n">bytes_until_sample</span> <span class="o">=</span> <span class="n">tsd_bytes_until_sample_get</span><span class="p">(</span><span class="n">tsd</span><span class="p">);</span>
+		<span class="n">bytes_until_sample</span> <span class="o">-=</span> <span class="n">usize</span><span class="p">;</span>
+		<span class="n">tsd_bytes_until_sample_set</span><span class="p">(</span><span class="n">tsd</span><span class="p">,</span> <span class="n">bytes_until_sample</span><span class="p">);</span>
+
+		<span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="n">bytes_until_sample</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">))</span> <span class="p">{</span>
+			<span class="cm">/*</span>
+<span class="cm">			 * Avoid a prof_active check on the fastpath.</span>
+<span class="cm">			 * If prof_active is false, set bytes_until_sample to</span>
+<span class="cm">			 * a large value.  If prof_active is set to true,</span>
+<span class="cm">			 * bytes_until_sample will be reset.</span>
+<span class="cm">			 */</span>
+			<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">prof_active</span><span class="p">)</span> <span class="p">{</span>
+				<span class="n">tsd_bytes_until_sample_set</span><span class="p">(</span><span class="n">tsd</span><span class="p">,</span> <span class="n">SSIZE_MAX</span><span class="p">);</span>
+			<span class="p">}</span>
+			<span class="k">return</span> <span class="n">malloc_default</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="n">cache_bin_t</span> <span class="o">*</span><span class="n">bin</span> <span class="o">=</span> <span class="n">tcache_small_bin_get</span><span class="p">(</span><span class="n">tcache</span><span class="p">,</span> <span class="n">ind</span><span class="p">);</span>
+	<span class="kt">bool</span> <span class="n">tcache_success</span><span class="p">;</span>
+	<span class="kt">void</span><span class="o">*</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">cache_bin_alloc_easy</span><span class="p">(</span><span class="n">bin</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">tcache_success</span><span class="p">);</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">tcache_success</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">config_stats</span><span class="p">)</span> <span class="p">{</span>
+			<span class="o">*</span><span class="n">tsd_thread_allocatedp_get</span><span class="p">(</span><span class="n">tsd</span><span class="p">)</span> <span class="o">+=</span> <span class="n">usize</span><span class="p">;</span>
+			<span class="n">bin</span><span class="o">-&gt;</span><span class="n">tstats</span><span class="p">.</span><span class="n">nrequests</span><span class="o">++</span><span class="p">;</span>
+		<span class="p">}</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">config_prof</span><span class="p">)</span> <span class="p">{</span>
+			<span class="n">tcache</span><span class="o">-&gt;</span><span class="n">prof_accumbytes</span> <span class="o">+=</span> <span class="n">usize</span><span class="p">;</span>
+		<span class="p">}</span>
+
+		<span class="n">LOG</span><span class="p">(</span><span class="s">&quot;core.malloc.exit&quot;</span><span class="p">,</span> <span class="s">&quot;result: %p&quot;</span><span class="p">,</span> <span class="n">ret</span><span class="p">);</span>
+
+		<span class="cm">/* Fastpath success */</span>
+		<span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="n">malloc_default</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+  </div>
+
+  
+<hr>
+
+<aside id="comments" class="disqus">
+  <h3><i class="icon icon-comments-o"></i> Comments</h3>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.leexun.tw/je_malloc';
+      this.page.identifier = '/jemalloc-source-code-tracing-jemalloc-default';
+    };
+    (function() {
+      var d = document,
+      s = d.createElement('script');
+      s.src = '//blogleexuntw.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+</aside>
+
+
+
+</article>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <ul class="social">
+  <li><a href="https://github.com/leexun" target="_blank"><i class="icon icon-github"></i></a></li>
+  <li><a href="https://twitter.com/speachlesslee" target="_blank"><i class="icon icon-twitter"></i></a></li>
+  <li><a href="https://facebook.com/" target="_blank"><i class="icon icon-facebook"></i></a></li>
+  <li><a href="https://www.linkedin.com/in/leexunofficial/" target="_blank"><i class="icon icon-linkedin"></i></a></li>
+</ul>
+    <p class="txt-medium-gray">
+      <small>&copy;2019 All rights reserved @leexun.
+    </p>
+  </div>
+</footer>
+
+
+  <a href="http://github.com/LeeXun/leexun.github.io" target="_blank" class="github-corner"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#337ab7; color:#fff; position: absolute; top: 0; border: 0; right: 0;"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+</body>
+</html>
