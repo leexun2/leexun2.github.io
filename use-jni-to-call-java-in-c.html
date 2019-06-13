@@ -75,8 +75,7 @@
 <ol>
   <li>If the java package name is <code>a.b.c</code> and the class name is <code>ClassName</code>, the parameter passed into <code>(*env)-&gt;FindClass</code> should be converted to <code>(*env)-&gt;FindClass(env, "a/b/c/ClassName");</code></li>
   <li>Set the option <code>-Djava.class.path=./your_jar_or java_class_file_location</code> in JavaVMOption well. Use ‘:’ in Unix or ‘;’ in Windows as a seperator if having multiple jars.</li>
-  <li>Set ignoreUnrecognized to JNI_FALSE for more error message like `
-Unrecognized option:`.</li>
+  <li>Set ignoreUnrecognized to JNI_FALSE for more error message like <code>Unrecognized option:</code>.</li>
   <li>To find where’s the jni.h and jni_md.h:
     <ul>
       <li>On Mac:</li>

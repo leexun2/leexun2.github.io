@@ -5,8 +5,8 @@
     <description>Lee Xun's blog</description>
     <link>https://blog.leexun.tw/</link>
     <atom:link href="https://blog.leexun.tw/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 13 Jun 2019 22:18:30 +0800</pubDate>
-    <lastBuildDate>Thu, 13 Jun 2019 22:18:30 +0800</lastBuildDate>
+    <pubDate>Thu, 13 Jun 2019 23:03:59 +0800</pubDate>
+    <lastBuildDate>Thu, 13 Jun 2019 23:03:59 +0800</lastBuildDate>
     <generator>Jekyll v3.6.3</generator>
     
       <item>
@@ -17,8 +17,7 @@
 &lt;ol&gt;
   &lt;li&gt;If the java package name is &lt;code&gt;a.b.c&lt;/code&gt; and the class name is &lt;code&gt;ClassName&lt;/code&gt;, the parameter passed into &lt;code&gt;(*env)-&amp;gt;FindClass&lt;/code&gt; should be converted to &lt;code&gt;(*env)-&amp;gt;FindClass(env, &quot;a/b/c/ClassName&quot;);&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;Set the option &lt;code&gt;-Djava.class.path=./your_jar_or java_class_file_location&lt;/code&gt; in JavaVMOption well. Use ‘:’ in Unix or ‘;’ in Windows as a seperator if having multiple jars.&lt;/li&gt;
-  &lt;li&gt;Set ignoreUnrecognized to JNI_FALSE for more error message like `
-Unrecognized option:`.&lt;/li&gt;
+  &lt;li&gt;Set ignoreUnrecognized to JNI_FALSE for more error message like &lt;code&gt;Unrecognized option:&lt;/code&gt;.&lt;/li&gt;
   &lt;li&gt;To find where’s the jni.h and jni_md.h:
     &lt;ul&gt;
       &lt;li&gt;On Mac:&lt;/li&gt;
